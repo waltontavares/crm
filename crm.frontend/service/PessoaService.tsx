@@ -1,32 +1,17 @@
 import axios from "axios";
-
+import { BaseService } from "./BaseService";
 
 export const axiosInstance = axios.create({
-
-    baseURL: "http://localhost:5066"
+    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL_API
 })
 
-export class PessoaService{
+export class PessoaService extends BaseService{
 
-    listarTodos(){
-        return axiosInstance.get("/api/Pessoa");
-
-    }
-
-    inserir(pessoa: Crm.Pessoa){
-        const { estado_Civil, ...dadosSemEstadoCivil } = pessoa;
-        console.log(dadosSemEstadoCivil);
-        return axiosInstance.post("/api/Pessoa", dadosSemEstadoCivil);
-
-    }
-
-    alterar(pessoa: Crm.Pessoa){
-        return axiosInstance.put("/api/Pessoa", pessoa);
-
+    constructor(){
+        super( "/api/Pessoa");
     }
 
     BuscarPessoaCpf(cpf: string){
         return axiosInstance.get("/api/Pessoa/" + cpf);
-
     }
 }

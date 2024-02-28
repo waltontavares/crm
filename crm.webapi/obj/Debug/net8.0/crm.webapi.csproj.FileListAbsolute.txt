@@ -103,3 +103,4 @@ C:\Users\walton.silva\Desktop\assura\crm\crm.webapi\obj\Debug\net8.0\refint\crm.
 C:\Users\walton.silva\Desktop\assura\crm\crm.webapi\obj\Debug\net8.0\crm.webapi.pdb
 C:\Users\walton.silva\Desktop\assura\crm\crm.webapi\obj\Debug\net8.0\crm.webapi.genruntimeconfig.cache
 C:\Users\walton.silva\Desktop\assura\crm\crm.webapi\obj\Debug\net8.0\ref\crm.webapi.dll
+C:\Users\walton.silva\Desktop\assura\crm\crm.webapi\obj\Debug\net8.0\crm.webapi.sourcelink.json

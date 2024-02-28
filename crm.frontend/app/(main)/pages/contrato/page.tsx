@@ -37,7 +37,6 @@ const Contrato = () => {
         total_Clausulas_Abusivas_Iof: 0,
         total_Acao: 0,
         taxa_Media_Juros: 0,
-        //total_Financiamento: 0,
         valor_Tutela: 0,
         dt_Ins: null,
         dt_Upd: null,
@@ -47,10 +46,22 @@ const Contrato = () => {
         banco: {fantasia: ''},
     };
 
+    let emptyClausula: Crm.Clausula_Abusiva = {
+        id: 0,
+        contratoId: 0,
+        ccontrato: {num_Contrato: '', valor_Bem: 0, valor_Entrada: 0, parcelas: 0, valor_Parcela: 0},
+        clausulaId: 0,
+        clausula: {desc_Clausula: ''},
+        valor_Clausula: 0,
+    };
+
     const [contratos, setContratos] = useState<Crm.Contrato[] | null>(null);
     const [contrato, setContrato] = useState<Crm.Contrato>(emptyContrato);
+    const [clausulas, setClausulas] = useState<Crm.Clausula[]>([]);
+    const [clausula, setClausula] = useState<Crm.Clausula_Abusiva>(emptyClausula);
     const [selectedContratos, setSelectedContratos] = useState(null);
     const [contratoDialog, setContratoDialog] = useState(false);
+    const [clausulaDialog, setClausulaDialog] = useState(false);
     const [pessoas, setPessoas] = useState<Crm.Pessoa[]>([]);
     const [bancos, setBancos] = useState<Crm.Banco[]>([]);
     const [submitted, setSubmitted] = useState(false);
@@ -87,6 +98,11 @@ const Contrato = () => {
                 }).catch((error) => {
                     console.log(error);
                 })
+        }
+    }, [bancoService, contratoDialog, pessoaService]);
+
+    useEffect(() => {
+        if(clausulaDialog){
             clausulaService.listarTodos()
             .then((response) => {
                 setPessoas(response.data);
@@ -94,7 +110,7 @@ const Contrato = () => {
                     console.log(error);
                 })
         }
-    }, [contratoDialog]);
+    }, [clausulaService, clausulaDialog]);
 
     const formatCurrency = (value: number) => {
         return value.toLocaleString('pt-BR', {
@@ -109,14 +125,22 @@ const Contrato = () => {
         setContratoDialog(true);
     };
 
+    const openClausulaNew = () => {
+        setClausula(emptyClausula);
+        setSubmitted(false);
+        setClausulaDialog(true);
+    };
+
     const hideDialog = () => {
         setSubmitted(false);
         setContratoDialog(false);
     };
 
-    const savePessoa = () => {
+    const saveContrato = () => {
          if (!contrato.id){
-            contratoService.inserir(contrato)
+            const { banco, ...dadosSemBanco } = contrato;
+            const { pessoa, ...dadosSemPessoa } = dadosSemBanco;
+            contratoService.inserir(dadosSemPessoa)
             .then((response) => {
                 setContratoDialog(false);
                 setContrato(emptyContrato);
@@ -157,7 +181,7 @@ const Contrato = () => {
     };
 
     const editContrato = (editContrato: Crm.Contrato) => {
-        setContrato({ ...editContrato });
+        setContrato({ ...editContrato });        
         setContratoDialog(true);
     };
 
@@ -189,6 +213,14 @@ const Contrato = () => {
         setContrato(_contrato);
     };
 
+    const onSelectedChangeClausula = (e: Crm.Clausula) => {
+        let _clausula = { ...clausula };
+        _clausula['clausulaId'] = e.id;
+        _clausula['clausula'] = e;
+
+        setClausula(_clausula);
+    };
+
     const onSelectedChangeBanco = (e: Crm.Banco) => {
         let _contrato = { ...contrato };
         _contrato['bancoId'] = e.id;
@@ -202,7 +234,7 @@ const Contrato = () => {
         let val = 0;
 
         if (campo == "valor_Bem"){
-            val = parseFloat(e.target.value.replace(',', '.')) - contrato.valor_Entrada;
+            val = parseFloat(e.target.value.replace(',', '.')) - contrato.valor_Entrada || 0;
         }
 
         if (campo == "valor_Entrada"){
@@ -284,7 +316,7 @@ const Contrato = () => {
         return (
             <>
                 <span className="p-column-title">Cliente</span>
-                {rowData.pessoa.nome}
+                {rowData.pessoa?.nome}
             </>
         );
     };
@@ -293,7 +325,7 @@ const Contrato = () => {
         return (
             <>
                 <span className="p-column-title">Banco</span>
-                {rowData.banco.fantasia}
+                {rowData.banco?.fantasia}
             </>
         );
     };
@@ -432,16 +464,7 @@ const Contrato = () => {
             </>
         );
     };
-
-    //const totalFinanciamentoBodyTemplate = (rowData: Crm.Contrato) => {
-    //    return (
-    //        <>
-    //            <span className="p-column-title">Total do Financiamento</span>
-    //            {formatCurrency(rowData.total_Financiamento as number)}
-    //        </>
-    //    );
-    //};
-
+  
     const valorTutelaBodyTemplate = (rowData: Crm.Contrato) => {
         return (
             <>
@@ -472,7 +495,7 @@ const Contrato = () => {
     const pessoaDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" text onClick={hideDialog} />
-            <Button label="Salvar" icon="pi pi-check" text onClick={savePessoa} />
+            <Button label="Salvar" icon="pi pi-check" text onClick={saveContrato} />
         </>
     );
     
@@ -524,7 +547,7 @@ const Contrato = () => {
                     </DataTable>
 
                     <Dialog visible={contratoDialog} style={{ width: '450px' }} header="Detalhes da Contrato" modal className="p-fluid" footer={pessoaDialogFooter} onHide={hideDialog}>
-                    <div className="field">
+                        <div className="field">
                             <label htmlFor="Pessoa">Cliente</label>
                             <Dropdown 
                                 id="pessoa"
@@ -548,7 +571,7 @@ const Contrato = () => {
                                 value={contrato.banco} 
                                 onChange={(e: DropdownChangeEvent) => onSelectedChangeBanco(e.value)}
                                 options={bancos} 
-                                optionLabel="nome"
+                                optionLabel="fantasia"
                                 placeholder="Selecione o banco" 
                                 required 
                                 className={classNames({
@@ -754,16 +777,23 @@ const Contrato = () => {
 
                         <div className="field">
                             <label htmlFor="ClausulasUf">Total Clausulas Abusivas</label>
-                            <InputNumber
-                                id="total_Clausulas_Abusivas_Iof"
-                                value={contrato.total_Clausulas_Abusivas_Iof}
-                                onValueChange={(e) => onInputNumberChange(e, 'total_Clausulas_Abusivas_Iof')}
-                                required
-                                className={classNames({
-                                    'p-invalid': submitted && !contrato.total_Clausulas_Abusivas_Iof
-                                })}
-                            />
-                            {submitted && !contrato.total_Clausulas_Abusivas_Iof && <small className="p-invalid">Total Clausulas Abusivas é obrigatório.</small>}
+                            <div className="formgrid grid">
+                                <div style={{ width: '350px' }}>
+                                    <InputNumber
+                                        id="total_Clausulas_Abusivas_Iof"
+                                        value={contrato.total_Clausulas_Abusivas_Iof}
+                                        onValueChange={(e) => onInputNumberChange(e, 'total_Clausulas_Abusivas_Iof')}
+                                        required
+                                        className={classNames({
+                                            'p-invalid': submitted && !contrato.total_Clausulas_Abusivas_Iof
+                                        })}
+                                    />
+                                </div>
+                                <div>
+                                    <Button label="..."  onClick={hideDialog} />
+                                </div>
+                                {submitted && !contrato.total_Clausulas_Abusivas_Iof && <small className="p-invalid">Total Clausulas Abusivas é obrigatório.</small>}
+                            </div>
                         </div>
 
                         <div className="field">
@@ -807,6 +837,37 @@ const Contrato = () => {
                             />
                             {submitted && !contrato.valor_Tutela && <small className="p-invalid">Valor da Tutela é obrigatório.</small>}
                         </div>
+                    </Dialog>
+                    <Dialog visible={clausulaDialog} style={{ width: '450px' }} header="Clausulas Abusivas" modal className="p-fluid" footer={pessoaDialogFooter} onHide={hideDialog}>
+                        <div className="field">
+                            <label htmlFor="Clausula">Clausula</label>
+                            <Dropdown 
+                                id="clausula"
+                                value={clausula.clausula} 
+                                onChange={(e: DropdownChangeEvent) => onSelectedChangeClausula(e.value)}
+                                options={clausula} 
+                                optionLabel="desc_Clausula"
+                                placeholder="Selecione a Cllausula" 
+                                required 
+                                className={classNames({
+                                    'p-invalid': submitted && !clausula.clausula
+                                })}
+                            />
+                            {submitted && !clausula.clausula && <small className="p-invalid">Clausula é obrigatório.</small>}
+                        </div>
+                        <div className="field">
+                            <label htmlFor="Tutela">Valor da Tutela</label>
+                            <InputNumber
+                                id="valor_Tutela"
+                                value={contrato.valor_Tutela}
+                                onValueChange={(e) => onInputNumberChange(e, 'valor_Tutela')}
+                                required
+                                className={classNames({
+                                    'p-invalid': submitted && !contrato.valor_Tutela
+                                })}
+                            />
+                            {submitted && !contrato.valor_Tutela && <small className="p-invalid">Valor da Tutela é obrigatório.</small>}
+                        </div>                        
                     </Dialog>
                 </div>
             </div>

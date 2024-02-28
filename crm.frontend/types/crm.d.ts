@@ -48,11 +48,11 @@ declare namespace Crm{
     type Contrato = {
         id?: number;
         num_Contrato?: string;
-        valor_Bem?: number;
-        valor_Entrada?: number;
+        valor_Bem: number;
+        valor_Entrada: number;
         valor_Financiar?: number;
-        parcelas?: number;
-        valor_Parcela?: number;
+        parcelas: number;
+        valor_Parcela: number;
         total_Financiamento?: number;
         juros_Mensal?: number;
         juros_Anual?: number;
@@ -63,14 +63,13 @@ declare namespace Crm{
         total_Clausulas_Abusivas_Iof?: number;
         total_Acao?: number;
         taxa_Media_Juros?: number;
-        //total_Financiamento?: number;
         valor_Tutela?: number;
         dt_Ins?: datetime;
         dt_Upd?: datetime;
         pessoaId?: number;
-        pessoa: Pessoa 
+        pessoa?: Pessoa 
         bancoId?: number;
-        banco: Banco;
+        banco?: Banco;
     };
 
     //ClausulaService
@@ -83,7 +82,7 @@ declare namespace Crm{
     type Clausula_Abusiva = {
         id?: number;
         contratoId?: number;
-        contrato: Contrato;
+        ccontrato: Contrato;
         clausulaId?: number;
         clausula: Clausula;
         valor_Clausula?: number;

@@ -13,6 +13,14 @@ public class ContratoRepository : IContratoRepository
         _context = context;
     }
 
+    public async Task<IEnumerable<Contrato>> BuscaContratos()
+    {
+        return await _context.Contratos
+        .Include(x => x.Pessoa)
+        .Include(x => x.Banco)
+        .ToListAsync();
+    }
+
     public async Task<Contrato> BuscaContato(string contrato, int pessoa, int banco)
     {
 #pragma warning disable CS8603 // Possible null reference return.

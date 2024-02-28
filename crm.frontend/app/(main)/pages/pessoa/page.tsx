@@ -70,7 +70,7 @@ const Pessoa = () => {
                     console.log(error);
                 })
         }
-    }, [pessoaDialog]);
+    }, [estadoCivilService, pessoaDialog]);
 
     const openNew = () => {
         setPessoa(emptyPessoa);
@@ -85,7 +85,8 @@ const Pessoa = () => {
 
     const savePessoa = () => {
          if (!pessoa.id){
-            pessoaService.inserir(pessoa)
+            const { estado_Civil, ...dadosSemEstadoCivil } = pessoa;
+            pessoaService.inserir(dadosSemEstadoCivil)
             .then((response) => {
                 setPessoaDialog(false);
                 setPessoa(emptyPessoa);

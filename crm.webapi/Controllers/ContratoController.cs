@@ -15,6 +15,15 @@ public class ContratoController : ControllerBase
         _repository = repository;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Get()
+    {
+        var contrato = await _repository.BuscaContratos();
+        return contrato.Any()
+                ? Ok(contrato)
+                : NotFound();
+    }
+
     [HttpGet("{contrato, pessoa, banco}")]
     public async Task<IActionResult> BuscaContrato(string num, int pessoa, int banco)
     {

@@ -1,33 +1,17 @@
 import axios from "axios";
-
+import { BaseService } from "./BaseService";
 
 export const axiosInstance = axios.create({
-
-    baseURL: "http://localhost:5066"
+    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL_API
 })
 
-export class ContratoService{
+export class ContratoService extends BaseService{
 
-    listarTodos(){
-        return axiosInstance.get("/api/Contrato");
-
-    }
-
-    inserir(contrato: Crm.Contrato){
-        const { banco, ...dadosSemBanco } = contrato;
-        const { pessoa, ...dadosSemPessoa } = dadosSemBanco;
-        console.log(dadosSemPessoa);
-        return axiosInstance.post("/api/Pessoa", dadosSemPessoa);
-
-    }
-
-    alterar(contrato: Crm.Pessoa){
-        return axiosInstance.put("/api/Pessoa", contrato);
-
+    constructor(){
+        super( "/api/Contrato");
     }
 
     BuscarContrato(contrato: string, pessoa: number, banco: number){
-        return axiosInstance.get("/api/Pessoa/" + contrato);
-
+        return axiosInstance.get("/api/Contrato/" + contrato);
     }
 }
